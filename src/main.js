@@ -1,7 +1,7 @@
 import iziToast from 'izitoast';
 import SimpleLightbox from 'simplelightbox';
 
-import { displayImages, showLoadingIndicator } from './js/render-functions.js';
+import { displayImages } from './js/render-functions.js';
 import { getImagesFromAPI } from './js/pixabay-api.js';
 
 import 'izitoast/dist/css/iziToast.min.css';
@@ -13,28 +13,44 @@ iziToast.settings({
 });
 
 // Функція для обробки форми пошуку
-const handleSearchSubmit = (event, form, galleryContainer, gallery) => {
+const handleSearchSubmit = (event, form, galleryContainer, gallery, loader) => {
   event.preventDefault();
   const query = form.elements.search.value.trim();
 
   // Якщо запит не порожній
   if (query) {
-    showLoadingIndicator(galleryContainer); // Показуємо індикатор завантаження
+    // Показуємо індикатор завантаження
+    loader.classList.add('active');
 
-    // Отримуємо зображення з API
-    getImagesFromAPI(query).then(images => {
-      displayImages(galleryContainer, images); // Відображаємо зображення
-      gallery.refresh(); // Оновлюємо галерею
+    getImagesFromAPI(query)
+      .then(images => {
+        // Відображаємо зображення
+        displayImages(galleryContainer, images);
+        gallery.refresh(); // Оновлюємо галерею
 
-      // Якщо зображень немає
-      if (!images.length) {
+        // Якщо зображень немає
+        if (!images.length) {
+          iziToast.error({
+            title: '❌ Error',
+            message:
+              'Sorry, there are no images matching your search query. Please try again!',
+          });
+        }
+
+        // Приховуємо індикатор завантаження після отримання даних
+        loader.classList.remove('active');
+      })
+      .catch(error => {
+        // Якщо виникла помилка при отриманні даних
         iziToast.error({
           title: '❌ Error',
           message:
-            'Sorry, there are no images matching your search query. Please try again!',
+            'An error occurred while fetching images. Please try again later.',
         });
-      }
-    });
+
+        // Приховуємо індикатор завантаження при помилці
+        loader.classList.remove('active');
+      });
   } else {
     iziToast.warning({
       title: '⚠️ Warning',
@@ -49,9 +65,10 @@ const handleSearchSubmit = (event, form, galleryContainer, gallery) => {
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('root');
 
-  // Рендеринг елементів
-  const form = document.querySelector('#search-form');
+  // Отримуємо доступ до форми, галереї та індикатора завантаження
+  const form = document.querySelector('.form');
   const galleryContainer = document.querySelector('#gallery');
+  const loader = document.querySelector('.loader');
 
   const gallery = new SimpleLightbox('#gallery a', {
     captionDelay: 250,
@@ -59,6 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   form.addEventListener('submit', event => {
-    handleSearchSubmit(event, form, galleryContainer, gallery);
+    handleSearchSubmit(event, form, galleryContainer, gallery, loader);
   });
 });
