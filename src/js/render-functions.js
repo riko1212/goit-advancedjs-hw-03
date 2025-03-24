@@ -1,40 +1,21 @@
 import SimpleLightbox from 'simplelightbox';
 
-const renderHTMLElement = (node, content, position = 'beforeend') => {
-  node.insertAdjacentHTML(position, content);
+// Функція для вставки HTML-контенту
+const insertHTML = (parent, content, position = 'beforeend') => {
+  parent.insertAdjacentHTML(position, content);
 };
 
-const removeInnerHTMLElement = node => {
+// Функція для очищення вмісту елемента
+const clearHTML = node => {
   node.innerHTML = '';
 };
 
-export const renderSearchFormElement = node => {
-  const content = `
-    <form class="search-form" id="search-form">
-      <input
-        type="text"
-        name="search"
-        autocomplete="off"
-        placeholder="Search images..."
-      />
-      <button type="submit">Search</button>
-    </form>
-  `;
-
-  renderHTMLElement(node, content);
-};
-
-export const renderGallery = node => {
-  const content = `<div class="gallery" id="gallery"></div>`;
-
-  renderHTMLElement(node, content);
-};
-
-export const renderGalleryItem = (node, images) => {
+// Функція для відображення елементів галереї
+const renderGalleryItem = (node, images) => {
   const content = images
     .map(
       image => `
-    <div class="gallery-item">
+    <li class="gallery-item">
       <a href="${image.largeImageURL}">
         <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" />
       </a>
@@ -56,29 +37,31 @@ export const renderGalleryItem = (node, images) => {
           ${image.downloads}
         </div>
       </div>
-    </div>
+    </li>
   `
     )
     .join('');
 
-  renderHTMLElement(node, content);
+  insertHTML(node, content);
 };
 
-export const renderImagesElement = (node, images) => {
-  removeInnerHTMLElement(node);
+// Функція для відображення елементів
+export const displayImages = (node, images) => {
+  clearHTML(node);
 
   if (images && images.length) {
     renderGalleryItem(node, images);
   }
 };
 
-export const renderLoadingElement = node => {
-  removeInnerHTMLElement(node);
+// Функція для відображення індикатора завантаження
+export const showLoadingIndicator = node => {
+  clearHTML(node);
 
   const content = `
     <div class="loading">Loading images, please wait...</div>
     <span class="loader"></span>
   `;
 
-  renderHTMLElement(node, content);
+  insertHTML(node, content);
 };

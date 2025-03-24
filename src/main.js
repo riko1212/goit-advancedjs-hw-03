@@ -1,12 +1,7 @@
 import iziToast from 'izitoast';
 import SimpleLightbox from 'simplelightbox';
 
-import {
-  renderSearchFormElement,
-  renderImagesElement,
-  renderGallery,
-  renderLoadingElement,
-} from './js/render-functions.js';
+import { displayImages, showLoadingIndicator } from './js/render-functions.js';
 import { getImagesFromAPI } from './js/pixabay-api.js';
 
 import 'izitoast/dist/css/iziToast.min.css';
@@ -17,16 +12,19 @@ iziToast.settings({
   timeout: 3000,
 });
 
+// Функція для обробки форми пошуку
 const handleSearchSubmit = (event, form, galleryContainer, gallery) => {
   event.preventDefault();
   const query = form.elements.search.value.trim();
 
+  // Якщо запит не порожній
   if (query) {
-    renderLoadingElement(galleryContainer);
+    showLoadingIndicator(galleryContainer); // Показуємо індикатор завантаження
 
+    // Отримуємо зображення з API
     getImagesFromAPI(query).then(images => {
-      renderImagesElement(galleryContainer, images);
-      gallery.refresh();
+      displayImages(galleryContainer, images); // Відображаємо зображення
+      gallery.refresh(); // Оновлюємо галерею
 
       // Якщо зображень немає
       if (!images.length) {
@@ -44,15 +42,14 @@ const handleSearchSubmit = (event, form, galleryContainer, gallery) => {
     });
   }
 
-  form.reset();
+  form.reset(); // Очищаємо форму
 };
 
+// Ініціалізація після завантаження сторінки
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('root');
 
-  renderSearchFormElement(root);
-  renderGallery(root);
-
+  // Рендеринг елементів
   const form = document.querySelector('#search-form');
   const galleryContainer = document.querySelector('#gallery');
 
